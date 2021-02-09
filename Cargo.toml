@@ -1,0 +1,11 @@
+[package]
+name = "grabrust_these_contigs"
+version = "0.1.0"
+authors = ["amsesk <amsesk@umich.edu>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bio = {git = "https://github.com/rust-bio/rust-bio"}
+clap = "3.0.0-beta.1"
