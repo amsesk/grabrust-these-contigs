@@ -81,10 +81,14 @@ fn main() -> Result<(), std::io::Error> {
                 }
             }
             if !skip {
+                let desc = match inner_record.desc() {
+                    Some(d) => d,
+                    None => "",
+                };
                 println!(
                     ">{} {}\n{}",
                     inner_record.id(),
-                    inner_record.desc().unwrap(),
+                    desc,
                     String::from_utf8(inner_record.seq().to_owned()).unwrap()
                 );
             }
