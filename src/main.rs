@@ -30,6 +30,13 @@ fn main() -> Result<(), std::io::Error> {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            Arg::new("remove")
+                .long("remove")
+                .about("Flip the script. Pass this flag if the list of sequence accessions contains contigs you want excluded instead of grabbed.")
+                .takes_value(false)
+                .required(false),
+        )
         .get_matches();
     let wanted_path = Path::new(args.value_of("wanted").unwrap());
     let wanted_fobj = File::open(wanted_path).unwrap();
@@ -43,17 +50,45 @@ fn main() -> Result<(), std::io::Error> {
     }
 
     let fasta_path = Path::new(args.value_of("fasta").unwrap());
-    let mut index_reader = bio::io::fasta::IndexedReader::from_file(&fasta_path).unwrap();
 
-    for want in wanted.iter() {
-        let mut text = Text::new();
-        match index_reader.fetch_all(&want) {
-            Ok(()) => {
-                index_reader.read(&mut text).unwrap();
-                println!(">{}\n{}", want, String::from_utf8(text).unwrap());
+    println!("{:?}", args.is_present("remove"));
+
+    if !args.is_present("remove") {
+        let mut index_reader = bio::io::fasta::IndexedReader::from_file(&fasta_path).unwrap();
+
+        for want in wanted.iter() {
+            let mut text = Text::new();
+            match index_reader.fetch_all(&want) {
+                Ok(()) => {
+                    index_reader.read(&mut text).unwrap();
+                    println!(">{}\n{}", want, String::from_utf8(text).unwrap());
+                }
+                Err(_e) => panic!("Unable to locate contig: {}", &want),
             }
-            Err(_e) => panic!("Unable to locate contig: {}", &want),
         }
+        Ok(())
+    } else {
+        let not_wanted = wanted.to_owned();
+        let regular_reader = bio::io::fasta::Reader::from_file(&fasta_path).unwrap();
+
+        for r in regular_reader.records() {
+            let mut skip = false;
+            let inner_record = r.unwrap();
+            for nw in not_wanted.iter() {
+                if nw == inner_record.id() {
+                    skip = true;
+                    break;
+                }
+            }
+            if !skip {
+                println!(
+                    ">{}\n{}",
+                    inner_record.id(),
+                    String::from_utf8(inner_record.seq().to_owned()).unwrap()
+                );
+            }
+        }
+
+        Ok(())
     }
-    Ok(())
 }
