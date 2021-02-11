@@ -82,8 +82,9 @@ fn main() -> Result<(), std::io::Error> {
             }
             if !skip {
                 println!(
-                    ">{}\n{}",
+                    ">{} {}\n{}",
                     inner_record.id(),
+                    inner_record.desc().unwrap(),
                     String::from_utf8(inner_record.seq().to_owned()).unwrap()
                 );
             }
