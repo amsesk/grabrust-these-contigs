@@ -51,8 +51,6 @@ fn main() -> Result<(), std::io::Error> {
 
     let fasta_path = Path::new(args.value_of("fasta").unwrap());
 
-    println!("{:?}", args.is_present("remove"));
-
     if !args.is_present("remove") {
         let mut index_reader = bio::io::fasta::IndexedReader::from_file(&fasta_path).unwrap();
 
