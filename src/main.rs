@@ -66,15 +66,16 @@ fn main() -> Result<(), std::io::Error> {
         }
         Ok(())
     } else {
-        let not_wanted = wanted.to_owned();
+        let mut not_wanted = wanted.to_owned();
         let regular_reader = bio::io::fasta::Reader::from_file(&fasta_path).unwrap();
 
         for r in regular_reader.records() {
             let mut skip = false;
             let inner_record = r.unwrap();
-            for nw in not_wanted.iter() {
+            for (i, nw) in not_wanted.iter_mut().enumerate() {
                 if nw == inner_record.id() {
                     skip = true;
+                    not_wanted.remove(i);
                     break;
                 }
             }
